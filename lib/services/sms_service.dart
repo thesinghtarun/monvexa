@@ -7,6 +7,7 @@ class BankDetectionResult {
   final String bankName;
   final String sender;
   final String accountNumber;
+  final double latestBalance;
   final int messageCount;
   final String matchedBy;
 
@@ -14,6 +15,7 @@ class BankDetectionResult {
     required this.bankName,
     required this.sender,
     required this.accountNumber,
+    required this.latestBalance,
     required this.messageCount,
     required this.matchedBy,
   });
@@ -71,7 +73,6 @@ class SmsService extends GetxService {
   }
 
   // ── TRAI Indian Bank Sender Codes ─────────────────────────────────
-  // Keys: Canonical substrings found inside Indian sender headers (e.g. JK-BOBSMS-S -> BOBSMS)
   static const Map<String, String> _traiBankSenderMap = {
     // Bank of Baroda
     'BOBSMS': 'Bank of Baroda',
@@ -148,7 +149,6 @@ class SmsService extends GetxService {
     'BOISMS': 'Bank of India',
   };
 
-  /// Discards promos (-P suffix), telecom spam, and unknown bulk senders
   bool _isPromotionalOrTelecom(String sender) {
     final s = sender.toUpperCase().trim();
     if (s.endsWith('-P') || s.endsWith('_P')) return true;
@@ -157,7 +157,6 @@ class SmsService extends GetxService {
     return false;
   }
 
-  /// Identifies the bank name ONLY from the official TRAI sender header
   String? _resolveBankFromSenderHeader(String sender) {
     if (_isPromotionalOrTelecom(sender)) return null;
 
@@ -171,9 +170,7 @@ class SmsService extends GetxService {
     return null;
   }
 
-  /// Extracts the genuine account ending digits from an SMS body
   String? _extractAccountNumber(String body) {
-    // 1. Regex search for account patterns: A/c XX3339, a/c ending 3339, acc no ...3339
     final accPatterns = [
       RegExp(r'(?:a/c|acct|account|acc)\s*(?:no\.?|ending)?\s*[:\-\s]*[x*]*(\d{3,6})\b', caseSensitive: false),
       RegExp(r'(?:a/c|acct|account)\s*[*xX]{2,}(\d{3,6})\b', caseSensitive: false),
@@ -190,11 +187,30 @@ class SmsService extends GetxService {
     return null;
   }
 
-  /// Validates that an SMS is an actual transactional/account alert
+  double? _extractAvailableBalance(String body) {
+    final balPatterns = [
+      // 1. "final balance is RS 12,450.00" / "final bal is Rs ..." / "balance is Rs ..."
+      RegExp(r'(?:final|total|net|avail|available|clear|clr)?\s*bal(?:ance)?\s*(?:is|in\s+a/c\s+is)?\s*[:\-\s]*(?:rs\.?|inr)?\s*([\d,]+(?:\.\d{1,2})?)', caseSensitive: false),
+      // 2. "Rs 12,450.00 is available/balance"
+      RegExp(r'(?:rs\.?|inr)\s*([\d,]+(?:\.\d{1,2})?)\s*(?:is\s+)?(?:final|avl|avail|available|clr|total)?\s*bal(?:ance)?\b', caseSensitive: false),
+      // 3. Fallback for "Bal: Rs 1234.50" or "Bal Rs.12345"
+      RegExp(r'\bbal\s*[:\-\s]*(?:rs\.?|inr)?\s*([\d,]+(?:\.\d{1,2})?)', caseSensitive: false),
+    ];
+
+    for (final reg in balPatterns) {
+      final match = reg.firstMatch(body);
+      if (match != null && match.group(1) != null) {
+        final rawNum = match.group(1)!.replaceAll(',', '');
+        final val = double.tryParse(rawNum);
+        if (val != null) return val;
+      }
+    }
+    return null;
+  }
+
   bool _isTransactionalAlert(String body) {
     final lower = body.toLowerCase();
 
-    // Must NOT be marketing or loan offers
     if (lower.contains('pre-approved') ||
         lower.contains('apply now') ||
         lower.contains('loan offer') ||
@@ -204,22 +220,19 @@ class SmsService extends GetxService {
       return false;
     }
 
-    // Must have transactional or balance keywords
     final txKeywords = [
       'debited', 'credited', 'withdrawn', 'transferred', 'sent to', 'received from',
       'deposited', 'spent', 'avl bal', 'available bal', 'clr bal', 'ledger bal',
-      'inr', 'rs.', 'neft', 'rtgs', 'imps', 'upi/cr', 'upi/dr'
+      'balance is', 'final balance', 'inr', 'rs.', 'neft', 'rtgs', 'imps', 'upi/cr', 'upi/dr'
     ];
 
     return txKeywords.any((kw) => lower.contains(kw));
   }
 
-  /// Main detection function: Header-first verification + account number validation
   Map<String, BankDetectionResult> analyzeAndDetectBanks() {
     debugPrint('-------------------------SMS Reading Analysis------------------');
     debugPrint('[SMS Reading] Analyzing ${allMessages.length} total messages with TRAI Header verification...');
 
-    // Grouping by unique key: "$bankName-$accountNumber"
     final Map<String, List<SmsModel>> accountMessages = {};
     final Map<String, String> accountSenders = {};
 
@@ -228,26 +241,22 @@ class SmsService extends GetxService {
     int noAccountNumDiscarded = 0;
 
     for (final sms in allMessages) {
-      // 1. Resolve Bank by TRAI sender header
       final bankName = _resolveBankFromSenderHeader(sms.address);
       if (bankName == null) {
         promoOrNonBankDiscarded++;
         continue;
       }
 
-      // 2. Validate transactional intent
       if (!_isTransactionalAlert(sms.body)) {
         continue;
       }
 
-      // 3. Extract mandatory account number
       final accNo = _extractAccountNumber(sms.body);
       if (accNo == null) {
         noAccountNumDiscarded++;
         continue;
       }
 
-      // Legitimate user bank account found!
       final key = '$bankName|$accNo';
       accountMessages.putIfAbsent(key, () => []).add(sms);
       accountSenders[key] = sms.address;
@@ -261,27 +270,44 @@ class SmsService extends GetxService {
 
     final results = <String, BankDetectionResult>{};
 
+    debugPrint('-------------------------Account Balance Extraction------------------');
     accountMessages.forEach((key, list) {
       final parts = key.split('|');
       final bankName = parts[0];
       final accNo = parts[1];
       final sender = accountSenders[key] ?? list.first.address;
 
+      // Sort by date descending to extract the latest available balance
+      list.sort((a, b) => b.date.compareTo(a.date));
+
+      double extractedBalance = 0.0;
+      String sampleSnippet = '';
+
+      for (final sms in list) {
+        final bal = _extractAvailableBalance(sms.body);
+        if (bal != null) {
+          extractedBalance = bal;
+          sampleSnippet = sms.body.replaceAll('\n', ' ');
+          if (sampleSnippet.length > 70) sampleSnippet = sampleSnippet.substring(0, 70) + '...';
+          break;
+        }
+      }
+
+      debugPrint('Bank: $bankName (..$accNo) | Extracted Balance: ₹ $extractedBalance');
+      if (sampleSnippet.isNotEmpty) {
+        debugPrint('  • Source SMS snippet: "$sampleSnippet"');
+      }
+
       results[key] = BankDetectionResult(
         bankName: bankName,
         sender: sender,
         accountNumber: accNo,
+        latestBalance: extractedBalance,
         messageCount: list.length,
         matchedBy: 'TRAI Header + Account # Verification',
       );
     });
-
-    debugPrint('---------------------------------------------------------');
-    debugPrint('[SMS Reading] FINAL DETECTED USER ACCOUNTS: ${results.length}');
-    results.forEach((key, r) {
-      debugPrint('  => [${r.bankName}] Account: ..${r.accountNumber} | Sender: ${r.sender} | Messages: ${r.messageCount}');
-    });
-    debugPrint('---------------------------------------------------------');
+    debugPrint('---------------------------------------------------------------------');
 
     return results;
   }

@@ -1,5 +1,7 @@
-import 'package:material_ui/material_ui.dart';
+import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:monvexa/constants/app_colors.dart';
+import 'package:monvexa/constants/string_const.dart';
 import 'package:monvexa/controller/tabs/home_tab_controller.dart';
 import 'package:monvexa/widgets/common/glass_container.dart';
 
@@ -47,7 +49,7 @@ class PermissionDeniedDialog extends StatelessWidget {
 
             // Title
             const Text(
-              'SMS Permission Required',
+              StringConst.smsPermissionRequired,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 18,
@@ -59,7 +61,7 @@ class PermissionDeniedDialog extends StatelessWidget {
 
             // Body
             const Text(
-              'Monvexa needs access to your SMS to automatically detect and track your bank transactions.',
+              StringConst.smsPermissionDesc,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -86,7 +88,7 @@ class PermissionDeniedDialog extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: const Text(
-                      'Cancel',
+                      StringConst.cancelButton,
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -107,7 +109,7 @@ class PermissionDeniedDialog extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     child: const Text(
-                      'Open Settings',
+                      StringConst.openSettingsButton,
                       style: TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),

@@ -33,29 +33,44 @@ class StringConst {
   static const tapBelowToAddAccount = 'Tap below to add an account.';
   static const addAccount = 'Add Account';
   static const noTransactions = 'No transactions yet.';
+  static const scanAndDetectAccounts = 'Scan & Detect Accounts';
+  static const scanAndAddOtherAccounts = 'Scan & Add Other Accounts';
+  static const myAccounts = 'My Accounts';
+  static const noAccountsAddedYet = 'No accounts added yet.';
+
+  static const totalBal = 'Total Balance';
+  static const encryptedBal = 'XXXX';
+
+  ///Permission Dialog
+  static const smsPermissionRequired = 'SMS Permission Required';
+  static const smsPermissionDesc =
+      'Monvexa needs access to your SMS to automatically detect and track your bank transactions.';
+  static const cancelButton = 'Cancel';
+  static const openSettingsButton = 'Open Settings';
 
   ///Account Detection Screen
-
+  static const closeButton = 'Close';
   static const gettingStarted = 'Getting started...';
   static const scanningInbox = 'Scanning inbox messages...';
   static const analyzingTransactions = 'Analyzing transaction alerts...';
-  static const verifyingBank = 'Verifying bank accounts...';
+  static const verifyingBank = 'Verifying new bank accounts...';
   static const finalizingAccounts = 'Finalizing accounts...';
 
-  
   static const settingUpAccounts = 'Setting Up Your Accounts';
   static const readingAccount =
-      'We are reading your inbox messages securely on-device to auto-detect your bank accounts.';
+      'Scanning your inbox to securely discover your bank accounts.';
   static const onDevicePrivacy = '100% on-device private processing';
-  static const accountDetected = 'Accounts Detected';
-  static String noOfAccDetected(int len) =>
-      'We discovered $len bank account(s) from your transaction SMS.';
-  static String transactionAlert(String sender, int count, String matchedBy) =>
-      '$sender • $count transaction alerts ($matchedBy)';
-  static const noAccountFoundAfterScanningSms =
-      'We scanned your SMS inbox but could not match any transaction alerts with our bank patterns. You can add your account manually or retry the scan.';
+
+  static const newAccountsFound = 'New Accounts Found';
+  static String newAccountsDiscovered(int count) =>
+      'We found $count new bank account(s). Check the ones you want to save.';
+  static const confirmAndSaveAccounts = 'Confirm & Save Accounts';
+
+  static const noNewAccountsFound = 'No New Accounts Found';
+  static const noNewAccountsDesc =
+      'All detected bank accounts from your SMS are already saved, or no new transaction alerts were found.';
   static const retryScan = 'Retry Scan';
-  static const continueToHome = 'Continue to Home Tab';
+  static const backToHomeTab = 'Back to Home Tab';
 
   ///Settings Tab
   static const settingsTabTitle = 'Settings';

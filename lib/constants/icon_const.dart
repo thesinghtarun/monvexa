@@ -12,8 +12,11 @@ class IconConst {
   static const IconData walletFill = Icons.account_balance_wallet_rounded;
   static const IconData settingsFill = CupertinoIcons.settings_solid;
 
-
   static const IconData add = Icons.add;
+  static const IconData hideBal = Icons.visibility;
+  static const IconData showBal = Icons.visibility_off;
+  static const IconData creditBal = Icons.arrow_upward;
+  static const IconData debitedBal = Icons.arrow_downward;
 
   static const IconData backArrow = Icons.chevron_left;
   static const IconData forwardArrow = Icons.chevron_right;

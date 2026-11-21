@@ -1,7 +1,7 @@
 class ImageConst{
 
   /// Logo
-  static const String logo = 'assets/images/monvexa_logo.webp';
+  static const String logo = 'assets/images/monvexa_app_icon.png';
 
   ///Onboarding
   static const String onboarding1='assets/images/onboarding/onboarding1.png';

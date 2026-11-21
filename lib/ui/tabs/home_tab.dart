@@ -4,8 +4,8 @@ import 'package:monvexa/constants/app_colors.dart';
 import 'package:monvexa/constants/image_const.dart';
 import 'package:monvexa/constants/string_const.dart';
 import 'package:monvexa/controller/tabs/home_tab_controller.dart';
+import 'package:monvexa/routes/app_routes.dart';
 import 'package:monvexa/widgets/home_tab/account_card.dart';
-import 'package:monvexa/widgets/home_tab/add_account_bottom_sheet.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -26,10 +26,9 @@ class HomeTab extends StatelessWidget {
         }
 
         if (state == 'noAccount') {
-          return _NoAccountView();
+          return const _NoAccountView();
         }
 
-        // 'ready' state — identical to original layout
         return Column(
           children: [
             const AccountCard(),
@@ -55,7 +54,10 @@ class HomeTab extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 100),
                 itemBuilder: (context, index) {
                   return ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 3),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 0,
+                      vertical: 3,
+                    ),
                     leading: const Icon(Icons.attach_money),
                     title: Text('Transaction ${index + 1}'),
                     subtitle: Text('Description of transaction ${index + 1}'),
@@ -80,25 +82,10 @@ class _NoAccountView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(ImageConst.noAccountFound, width: 200, height: 200),
+          Image.asset(ImageConst.noAccountFound, width: 400, height: 400),
 
-          // Empty state illustration/icon
-          Container(
-            width: 76,
-            height: 76,
-            decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.08),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.account_balance_wallet_outlined,
-              size: 38,
-              color: AppColors.primary,
-            ),
-          ),
           const SizedBox(height: 16),
 
-          // Text labels from StringConst
           const Text(
             StringConst.noAccountFound,
             style: TextStyle(
@@ -114,17 +101,21 @@ class _NoAccountView extends StatelessWidget {
           ),
           const SizedBox(height: 26),
 
-          // Add Account Button
+          // Scan & Detect Accounts Button
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: SizedBox(
               width: double.infinity,
               height: 52,
               child: ElevatedButton.icon(
-                onPressed: showAddAccountBottomSheet,
-                icon: const Icon(Icons.add, size: 20),
+                onPressed: () {
+                  Get.toNamed(AppRoutes.accountDetection)?.then((_) {
+                    HomeTabController.to.loadAccountsFromDb();
+                  });
+                },
+                icon: const Icon(Icons.document_scanner_rounded, size: 20),
                 label: const Text(
-                  StringConst.addAccount,
+                  'Scan & Detect Accounts',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -138,8 +129,6 @@ class _NoAccountView extends StatelessWidget {
               ),
             ),
           ),
-
-           // clearance for bottom nav bar
         ],
       ),
     );

@@ -2,9 +2,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:monvexa/constants/app_colors.dart';
+import 'package:monvexa/constants/string_const.dart';
 import 'package:monvexa/controller/tabs/home_tab_controller.dart';
 import 'package:monvexa/models/account_model.dart';
-import 'package:monvexa/widgets/home_tab/add_account_bottom_sheet.dart';
+import 'package:monvexa/routes/app_routes.dart';
 
 /// Call this to show the account switcher sheet
 void showAccountSwitcherBottomSheet() {
@@ -60,7 +61,7 @@ class _AccountSwitcherSheet extends StatelessWidget {
               const SizedBox(height: 20),
 
               const Text(
-                'My Accounts',
+                StringConst.myAccounts,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
@@ -77,7 +78,7 @@ class _AccountSwitcherSheet extends StatelessWidget {
                   return const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16),
                     child: Text(
-                      'No accounts added yet.',
+                      StringConst.noAccountsAddedYet,
                       style: TextStyle(color: Colors.grey),
                     ),
                   );
@@ -100,11 +101,13 @@ class _AccountSwitcherSheet extends StatelessWidget {
 
               const Divider(height: 24),
 
-              // Add new account
+              // Add new account via Account Detection
               InkWell(
                 onTap: () {
                   Get.back(); // close switcher
-                  showAddAccountBottomSheet();
+                  Get.toNamed(AppRoutes.accountDetection)?.then((_) {
+                    controller.loadAccountsFromDb();
+                  });
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Padding(
@@ -123,7 +126,7 @@ class _AccountSwitcherSheet extends StatelessWidget {
                       ),
                       const SizedBox(width: 14),
                       const Text(
-                        'Add New Account',
+                        StringConst.scanAndAddOtherAccounts,
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -195,7 +198,9 @@ class _AccountTile extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    account.bankName,
+                    account.balance > 0
+                        ? '${account.bankName} • Bal: ₹ ${account.balance.toStringAsFixed(2)}'
+                        : account.bankName,
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,
