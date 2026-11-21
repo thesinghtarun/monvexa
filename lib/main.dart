@@ -1,6 +1,8 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
+import 'package:monvexa/firebase_options.dart';
 import 'package:monvexa/routes/app_pages.dart';
 import 'package:monvexa/routes/app_routes.dart';
 import 'package:monvexa/services/pref_service.dart';
@@ -9,6 +11,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+   await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   final prefs = PrefService();
   await prefs.init();
   Get.put(prefs, permanent: true);

@@ -1,15 +1,13 @@
 import 'dart:async';
+
 import 'package:get/get.dart';
+import 'package:monvexa/constants/string_const.dart';
 import 'package:monvexa/controller/tabs/home_tab_controller.dart';
 import 'package:monvexa/models/account_model.dart';
 import 'package:monvexa/services/sms_service.dart';
 import 'package:monvexa/widgets/home_tab/add_account_bottom_sheet.dart';
 
-enum ScanStage {
-  inProgress,
-  found,
-  notFound,
-}
+enum ScanStage { inProgress, found, notFound }
 
 class DetectedAccountItem {
   final String bankName;
@@ -35,17 +33,24 @@ class AccountDetectionController extends GetxController {
   // State management
   final Rx<ScanStage> stage = ScanStage.inProgress.obs;
   final RxInt activeStepIndex = 0.obs; // 0 to 4
-  final RxList<bool> stepCompleted = <bool>[false, false, false, false, false].obs;
+  final RxList<bool> stepCompleted = <bool>[
+    false,
+    false,
+    false,
+    false,
+    false,
+  ].obs;
 
   final List<String> progressSteps = [
-    'Getting started...',
-    'Scanning inbox messages...',
-    'Analyzing transaction alerts...',
-    'Verifying bank accounts...',
-    'Finalizing accounts...',
+    StringConst.gettingStarted,
+    StringConst.scanningInbox,
+    StringConst.analyzingTransactions,
+    StringConst.verifyingBank,
+    StringConst.finalizingAccounts,
   ];
 
-  final RxList<DetectedAccountItem> detectedAccounts = <DetectedAccountItem>[].obs;
+  final RxList<DetectedAccountItem> detectedAccounts =
+      <DetectedAccountItem>[].obs;
 
   @override
   void onInit() {
@@ -88,14 +93,16 @@ class AccountDetectionController extends GetxController {
     // Evaluate results
     if (analysisResults.isNotEmpty) {
       detectedAccounts.assignAll(
-        analysisResults.values.map((res) => DetectedAccountItem(
-              bankName: res.bankName,
-              sender: res.sender,
-              accountNumber: res.accountNumber,
-              messageCount: res.messageCount,
-              matchedBy: res.matchedBy,
-              isSelected: true,
-            )),
+        analysisResults.values.map(
+          (res) => DetectedAccountItem(
+            bankName: res.bankName,
+            sender: res.sender,
+            accountNumber: res.accountNumber,
+            messageCount: res.messageCount,
+            matchedBy: res.matchedBy,
+            isSelected: true,
+          ),
+        ),
       );
       stage.value = ScanStage.found;
     } else {
@@ -116,13 +123,15 @@ class AccountDetectionController extends GetxController {
     for (final acc in detectedAccounts.where((a) => a.isSelected)) {
       final accName = '${acc.bankName} (..${acc.accountNumber})';
 
-      homeController.addAccount(AccountModel(
-        id: '${DateTime.now().millisecondsSinceEpoch}_${acc.accountNumber}',
-        name: accName,
-        bankName: acc.bankName,
-        type: 'savings',
-        address: acc.sender,
-      ));
+      homeController.addAccount(
+        AccountModel(
+          id: '${DateTime.now().millisecondsSinceEpoch}_${acc.accountNumber}',
+          name: accName,
+          bankName: acc.bankName,
+          type: 'savings',
+          address: acc.sender,
+        ),
+      );
     }
     Get.back();
   }
