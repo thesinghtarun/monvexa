@@ -1,13 +1,20 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:get/get.dart';
 import 'package:monvexa/constants/app_colors.dart';
 import 'package:monvexa/constants/icon_const.dart';
 import 'package:monvexa/constants/string_const.dart';
+import 'package:monvexa/controller/tabs/home_tab_controller.dart';
+import 'package:monvexa/widgets/common/glass_container.dart';
+import 'package:monvexa/widgets/home_tab/account_switcher_bottom_sheet.dart';
+import 'package:monvexa/widgets/home_tab/add_account_bottom_sheet.dart';
 
 class AccountCard extends StatelessWidget {
   const AccountCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final controller = HomeTabController.to;
+
     return Container(
       height: 500,
       width: double.infinity,
@@ -28,7 +35,7 @@ class AccountCard extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: .only(
+        padding: EdgeInsets.only(
           top: MediaQuery.of(context).padding.top + 20,
           left: 20,
           right: 20,
@@ -36,9 +43,9 @@ class AccountCard extends StatelessWidget {
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: .spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   StringConst.hello,
                   style: TextStyle(
                     fontSize: 24.0,
@@ -47,66 +54,52 @@ class AccountCard extends StatelessWidget {
                   ),
                 ),
 
-                //Account Selector
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 7,
-                  ),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFFF3F1FF), Color(0xFFFFE8D5)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+                // ── Account Selector (Glass Effect + Functional) ──
+                Obx(
+                  () => GestureDetector(
+                    onTap: showAccountSwitcherBottomSheet,
+                    child: GlassContainer(
+                      blur: 10,
+                      opacity: 0.22,
+                      radius: 30,
+                      tint: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 7,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            controller.activeAccountName,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          const Icon(
+                            Icons.keyboard_arrow_down_rounded,
+                            size: 17,
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.8),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.06),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                     
-                      const Text(
-                        'Personal Account',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF252525),
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      const Icon(
-                        Icons.keyboard_arrow_down_rounded,
-                        size: 17,
-                        color: Color(0xFF555555),
-                      ),
-                    ],
                   ),
                 ),
 
-                //Add Another Account
-                InkWell(
-                  onTap: () {
-                    // Handle add button tap
-                  },
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                    radius: 18.0,
-                    child: Icon(
-                      IconConst.add,
-                      size: 30.0,
-                      color: AppColors.primary,
-                    ),
+                // ── Add Another Account (Glass Effect + Functional) ──
+                GestureDetector(
+                  onTap: showAddAccountBottomSheet,
+                  child: GlassContainer(
+                    blur: 10,
+                    opacity: 0.22,
+                    radius: 50,
+                    tint: Colors.white,
+                    padding: const EdgeInsets.all(7),
+                    child: Icon(IconConst.add, size: 24.0, color: Colors.white),
                   ),
                 ),
               ],

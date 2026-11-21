@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:monvexa/constants/image_const.dart';
 import 'package:monvexa/constants/string_const.dart';
 import 'package:monvexa/routes/app_routes.dart';
+import 'package:monvexa/services/pref_service.dart';
 
 class OnboardingController extends GetxController {
   final PageController pageController = PageController();
@@ -35,30 +36,50 @@ class OnboardingController extends GetxController {
   ];
 
   String getOnboardingImage(int index) => onboardingImages[index];
-
   String getOnboardingTitle1(int index) => onboardingTitles1[index];
-
   String getOnboardingTitle2(int index) => onboardingTitles2[index];
-
   String getOnboardingDescription(int index) => onboardingDescriptions[index];
+
+  void onPageChanged(int index) {
+    currentPage.value = index;
+  }
 
   void nextPage() {
     if (isLastPage) {
-      Get.toNamed(AppRoutes.home);
-    } else {
-      currentPage.value++;
+      PrefService.to.setOnboardingDone();
+      Get.offAllNamed(AppRoutes.home);
+    } else if (pageController.hasClients) {
+      pageController.nextPage(
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOutCubic,
+      );
     }
   }
 
   void previousPage() {
-    if (currentPage.value > 0) {
-      currentPage.value--;
+    if (pageController.hasClients && currentPage.value > 0) {
+      pageController.previousPage(
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOutCubic,
+      );
     }
   }
 
   void goToPage(int index) {
-    if (index >= 0 && index < onboardingImages.length) {
-      currentPage.value = index;
+    if (pageController.hasClients &&
+        index >= 0 &&
+        index < onboardingImages.length) {
+      pageController.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 350),
+        curve: Curves.easeInOutCubic,
+      );
     }
+  }
+
+  @override
+  void onClose() {
+    pageController.dispose();
+    super.onClose();
   }
 }

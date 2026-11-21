@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:monvexa/routes/app_routes.dart';
+import 'package:monvexa/services/pref_service.dart';
 
 class SplashController extends GetxController with GetTickerProviderStateMixin {
   late AnimationController logoController;
@@ -96,7 +97,8 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
     await progressController.forward();
 
     // 5. Navigate to Home
-    Get.offNamed(AppRoutes.onboarding);
+    final bool done = PrefService.to.isOnboardingDone;
+    Get.offNamed(done ? AppRoutes.home : AppRoutes.onboarding);
   }
 
   @override
