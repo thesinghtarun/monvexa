@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:monvexa/constants/app_colors.dart';
-import 'package:monvexa/controller/screens/account_detection_controller.dart';
+import 'package:monvexa/constants/string_const.dart';
+import 'package:monvexa/controller/accounts/account_detection_controller.dart';
 import 'package:monvexa/widgets/common/glass_container.dart';
 
 class AccountDetectionScreen extends GetView<AccountDetectionController> {
@@ -22,7 +23,7 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
           TextButton(
             onPressed: controller.skipToHome,
             child: const Text(
-              'Skip',
+              StringConst.closeButton,
               style: TextStyle(
                 color: AppColors.primary,
                 fontWeight: FontWeight.w600,
@@ -49,7 +50,7 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // 1. STEP-BY-STEP ANIMATED PROGRESS VIEW
+  // 1. STEP-BY-STEP PROGRESS VIEW
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildProgressView(BuildContext context) {
     return Padding(
@@ -59,7 +60,7 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
         children: [
           const SizedBox(height: 12),
           const Text(
-            'Setting Up Your Accounts',
+            StringConst.settingUpAccounts,
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -69,7 +70,7 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
           ),
           const SizedBox(height: 8),
           const Text(
-            'We are reading your inbox messages securely on-device to auto-detect your bank accounts.',
+            StringConst.readingAccount,
             style: TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
@@ -78,7 +79,6 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
           ),
           const SizedBox(height: 36),
 
-          // Steps list Card
           GlassContainer(
             blur: 12,
             opacity: 0.35,
@@ -95,7 +95,6 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: Row(
                     children: [
-                      // Status Icon
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
                         width: 32,
@@ -128,8 +127,6 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
                         ),
                       ),
                       const SizedBox(width: 16),
-
-                      // Text
                       Expanded(
                         child: Text(
                           controller.progressSteps[index],
@@ -150,8 +147,6 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
           ),
 
           const Spacer(),
-
-          // Bottom reassuring privacy tip
           Center(
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -159,7 +154,7 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
                 Icon(Icons.lock_outline_rounded, size: 16, color: AppColors.textSecondary),
                 SizedBox(width: 6),
                 Text(
-                  '100% on-device private processing',
+                  StringConst.onDevicePrivacy,
                   style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                 ),
               ],
@@ -181,7 +176,7 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Accounts Detected',
+            StringConst.newAccountsFound,
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -190,7 +185,7 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
           ),
           const SizedBox(height: 6),
           Text(
-            'We discovered ${controller.detectedAccounts.length} bank account(s) from your transaction SMS.',
+            StringConst.newAccountsDiscovered(controller.detectedAccounts.length),
             style: const TextStyle(
               fontSize: 14,
               color: AppColors.textSecondary,
@@ -199,7 +194,6 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
           ),
           const SizedBox(height: 20),
 
-          // List of detected accounts
           Expanded(
             child: ListView.builder(
               itemCount: controller.detectedAccounts.length,
@@ -262,29 +256,29 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
                                       color: AppColors.primaryDark,
                                     ),
                                   ),
-                                  if (item.accountNumber != null) ...[
-                                    const SizedBox(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary.withOpacity(0.12),
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        '..${item.accountNumber}',
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppColors.primary,
-                                        ),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.primary.withOpacity(0.12),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      '..${item.accountNumber}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.primary,
                                       ),
                                     ),
-                                  ],
+                                  ),
                                 ],
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '${item.sender} • ${item.messageCount} transaction alerts (${item.matchedBy})',
+                                item.balance > 0
+                                    ? 'Balance: ₹ ${item.balance.toStringAsFixed(2)} • ${item.messageCount} alerts'
+                                    : '${item.sender} • ${item.messageCount} alerts',
                                 style: const TextStyle(
                                   fontSize: 12,
                                   color: AppColors.textSecondary,
@@ -303,7 +297,6 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
 
           const SizedBox(height: 12),
 
-          // Confirm Button
           SizedBox(
             width: double.infinity,
             height: 54,
@@ -319,32 +312,19 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               child: const Text(
-                'Confirm & Continue',
+                StringConst.confirmAndSaveAccounts,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
             ),
           ),
-          const SizedBox(height: 10),
-
-          // Manual option
-          Center(
-            child: TextButton.icon(
-              onPressed: controller.addManually,
-              icon: const Icon(Icons.add, size: 18, color: AppColors.primary),
-              label: const Text(
-                'Add Another Account Manually',
-                style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.primary),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
         ],
       ),
     );
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // 3. NOT FOUND VIEW (ON THE SAME SCREEN)
+  // 3. NOT FOUND / NO NEW ACCOUNTS VIEW
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildNotFoundView(BuildContext context) {
     return Padding(
@@ -361,14 +341,14 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
               shape: BoxShape.circle,
             ),
             child: const Icon(
-              Icons.search_off_rounded,
+              Icons.account_balance_wallet_outlined,
               size: 44,
               color: AppColors.primary,
             ),
           ),
           const SizedBox(height: 24),
           const Text(
-            'No Accounts Found',
+            StringConst.noNewAccountsFound,
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w800,
@@ -377,7 +357,7 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
           ),
           const SizedBox(height: 10),
           const Text(
-            'We scanned your SMS inbox but could not match any transaction alerts with our bank patterns. You can add your account manually or retry the scan.',
+            StringConst.noNewAccountsDesc,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
@@ -387,15 +367,15 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
           ),
           const SizedBox(height: 36),
 
-          // Add Manually Button
+          // Retry Scan Button
           SizedBox(
             width: double.infinity,
             height: 52,
             child: ElevatedButton.icon(
-              onPressed: controller.addManually,
-              icon: const Icon(Icons.add_rounded, size: 20),
+              onPressed: controller.retryScan,
+              icon: const Icon(Icons.refresh_rounded, size: 20, color: Colors.white),
               label: const Text(
-                'Add Account Manually',
+                StringConst.retryScan,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
               style: ElevatedButton.styleFrom(
@@ -406,32 +386,13 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-          // Retry Scan Button
-          SizedBox(
-            width: double.infinity,
-            height: 52,
-            child: OutlinedButton.icon(
-              onPressed: controller.retryScan,
-              icon: const Icon(Icons.refresh_rounded, size: 20, color: AppColors.primary),
-              label: const Text(
-                'Retry Scan',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary),
-              ),
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.primary, width: 1.5),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-            ),
-          ),
-          const Spacer(),
-
-          // Skip to Home
+          // Continue to Home Tab
           TextButton(
             onPressed: controller.skipToHome,
             child: const Text(
-              'Continue to Home Tab',
+              StringConst.backToHomeTab,
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -439,7 +400,7 @@ class AccountDetectionScreen extends GetView<AccountDetectionController> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
+          const Spacer(),
         ],
       ),
     );

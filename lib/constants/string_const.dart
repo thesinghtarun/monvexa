@@ -4,14 +4,14 @@ class StringConst {
   static const String appDescription = 'A Expense Tracker Application.';
 
   ///Onboarding Screens
-  static const onboarding1Title1 = 'Track Your';
-  static const onboarding1Title2 = 'Expenses';
+  static const onboarding1Title1 = 'Your Expenses';
+  static const onboarding1Title2 = 'Track Automatically';
   static const onboarding1Description =
-      'Keep a record of all your\nspending in one place.';
-  static const onboarding2Title1 = 'Set Your';
-  static const onboarding2Title2 = 'Budget';
+      'No more manually adding every transaction.\nLet us help organize your spending.';
+  static const onboarding2Title1 = 'Your Messages';
+  static const onboarding2Title2 = 'Stays Yours';
   static const onboarding2Description =
-      'Plan your budget and\nstay on track effortlessly.';
+      'Your privacy matters.\nWe never compromise it.';
   static const onboarding3Title1 = 'Reach Your';
   static const onboarding3Title2 = 'Financial Goals';
   static const onboarding3Description =
@@ -33,6 +33,44 @@ class StringConst {
   static const tapBelowToAddAccount = 'Tap below to add an account.';
   static const addAccount = 'Add Account';
   static const noTransactions = 'No transactions yet.';
+  static const scanAndDetectAccounts = 'Scan & Detect Accounts';
+  static const scanAndAddOtherAccounts = 'Scan & Add Other Accounts';
+  static const myAccounts = 'My Accounts';
+  static const noAccountsAddedYet = 'No accounts added yet.';
+
+  static const totalBal = 'Total Balance';
+  static const encryptedBal = 'XXXX';
+
+  ///Permission Dialog
+  static const smsPermissionRequired = 'SMS Permission Required';
+  static const smsPermissionDesc =
+      'Monvexa needs access to your SMS to automatically detect and track your bank transactions.';
+  static const cancelButton = 'Cancel';
+  static const openSettingsButton = 'Open Settings';
+
+  ///Account Detection Screen
+  static const closeButton = 'Close';
+  static const gettingStarted = 'Getting started...';
+  static const scanningInbox = 'Scanning inbox messages...';
+  static const analyzingTransactions = 'Analyzing transaction alerts...';
+  static const verifyingBank = 'Verifying new bank accounts...';
+  static const finalizingAccounts = 'Finalizing accounts...';
+
+  static const settingUpAccounts = 'Setting Up Your Accounts';
+  static const readingAccount =
+      'Scanning your inbox to securely discover your bank accounts.';
+  static const onDevicePrivacy = '100% on-device private processing';
+
+  static const newAccountsFound = 'New Accounts Found';
+  static String newAccountsDiscovered(int count) =>
+      'We found $count new bank account(s). Check the ones you want to save.';
+  static const confirmAndSaveAccounts = 'Confirm & Save Accounts';
+
+  static const noNewAccountsFound = 'No New Accounts Found';
+  static const noNewAccountsDesc =
+      'All detected bank accounts from your SMS are already saved, or no new transaction alerts were found.';
+  static const retryScan = 'Retry Scan';
+  static const backToHomeTab = 'Back to Home Tab';
 
   ///Settings Tab
   static const settingsTabTitle = 'Settings';

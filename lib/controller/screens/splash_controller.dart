@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:monvexa/routes/app_routes.dart';
+import 'package:monvexa/services/database_service.dart';
 import 'package:monvexa/services/pref_service.dart';
+import 'package:monvexa/services/sms_service.dart';
 
 class SplashController extends GetxController with GetTickerProviderStateMixin {
   late AnimationController logoController;
@@ -84,21 +86,39 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
   }
 
   Future<void> startSplashAnimation() async {
-    // 1. Logo
+    // 1. Logo animation
     await logoController.forward();
 
-    // 2. App Name
+    // 2. App Name animation
     await nameController.forward();
 
-    // 3. Description
+    // 3. Description animation
     await descriptionController.forward();
 
-    // 4. Loader 0-100%
-    await progressController.forward();
+    // 4. Concurrently run loader progress (0 to 100%) and background warm-up initialization
+    await Future.wait([
+      progressController.forward(),
+      _warmupServicesAndData(),
+    ]);
 
-    // 5. Navigate to Home
+    // 5. Navigate to Home or Onboarding
     final bool done = PrefService.to.isOnboardingDone;
     Get.offNamed(done ? AppRoutes.home : AppRoutes.onboarding);
+  }
+
+  Future<void> _warmupServicesAndData() async {
+    try {
+      // Warm up SQLite database
+      await DatabaseService.to.database;
+
+      // Check permission silently & preload SMS if already granted
+      if (Get.isRegistered<SmsService>()) {
+        final smsService = Get.find<SmsService>();
+        await smsService.checkPermissionSilently();
+      }
+    } catch (_) {
+      // Graceful fallback — non-blocking
+    }
   }
 
   @override

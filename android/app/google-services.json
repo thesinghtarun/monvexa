@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "884347649024",
+    "project_id": "monvexa-310",
+    "storage_bucket": "monvexa-310.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884347649024:android:36e4e60df7638317ebace5",
+        "android_client_info": {
+          "package_name": "com.singhtarun.monvexa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwY9VAV9qZHh1G6L-hK-0u36oIPSkcIeU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

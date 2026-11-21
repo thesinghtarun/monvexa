@@ -1,4 +1,4 @@
-package com.example.monvexa
+package com.singhtarun.monvexa
 
 import android.Manifest
 import android.content.Intent
