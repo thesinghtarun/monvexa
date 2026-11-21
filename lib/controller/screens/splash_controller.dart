@@ -111,7 +111,10 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
       // Warm up SQLite database
       await DatabaseService.to.database;
 
-      // Check permission silently & preload SMS if already granted
+      // Only check and load SMS if onboarding was already completed by the user
+      final bool onboardingDone = PrefService.to.isOnboardingDone;
+      if (!onboardingDone) return;
+
       if (Get.isRegistered<SmsService>()) {
         final smsService = Get.find<SmsService>();
         await smsService.checkPermissionSilently();

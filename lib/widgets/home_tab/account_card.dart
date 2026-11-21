@@ -1,10 +1,7 @@
-
 import 'dart:ui';
-
-import 'package:material_ui/material_ui.dart';
-import 'package:get/get.dart';
 import 'package:fl_chart/fl_chart.dart';
-
+import 'package:get/get.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:monvexa/constants/app_colors.dart';
 import 'package:monvexa/constants/icon_const.dart';
 import 'package:monvexa/constants/string_const.dart';
@@ -21,7 +18,7 @@ class AccountCard extends StatelessWidget {
     final controller = HomeTabController.to;
 
     return Container(
-      height: 500,
+      height: 400,
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -47,17 +44,17 @@ class AccountCard extends StatelessWidget {
         child: Stack(
           children: [
             // Background glass effect
-            Positioned.fill(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(
-                  sigmaX: 10,
-                  sigmaY: 10,
-                ),
-                child: Container(
-                  color: Colors.black.withValues(alpha: 0.04),
-                ),
-              ),
-            ),
+            // Positioned.fill(
+            //   child: BackdropFilter(
+            //     filter: ImageFilter.blur(
+            //       sigmaX: 10,
+            //       sigmaY: 10,
+            //     ),
+            //     child: Container(
+            //       color: Colors.black.withValues(alpha: 0.04),
+            //     ),
+            //   ),
+            // ),
 
             // Main content
             Padding(
@@ -72,7 +69,6 @@ class AccountCard extends StatelessWidget {
                   // --------------------------------
                   // HEADER
                   // --------------------------------
-
                   Row(
                     children: [
                       const Text(
@@ -116,8 +112,8 @@ class AccountCard extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 5),
-                                  const Icon(
-                                    Icons.keyboard_arrow_down_rounded,
+                                   Icon(
+                                    IconConst.dropDown,
                                     size: 18,
                                     color: Colors.white,
                                   ),
@@ -155,40 +151,29 @@ class AccountCard extends StatelessWidget {
                     ],
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 20),
 
                   // --------------------------------
                   // TOTAL BALANCE TITLE
                   // --------------------------------
-
-                 Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.account_balance_wallet_rounded,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 9),
-                        Text(
-                          StringConst.totalBal,
-                          style: const TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ],
-                    ),
                  
+                     
+                      Text(
+                        StringConst.totalBal,
+                        style: const TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                   
 
                   const SizedBox(height: 8),
 
                   // --------------------------------
                   // BALANCE AMOUNT
                   // --------------------------------
-
                   Obx(
                     () => Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -198,7 +183,7 @@ class AccountCard extends StatelessWidget {
                             fit: BoxFit.scaleDown,
                             child: Text(
                               controller.showBal.value
-                                  ? '₹ ${controller.active.value?.balance ?? 0}'
+                                  ? '₹ ${controller.active.value?.balance.toStringAsFixed(2) ?? '0.00'}'
                                   : StringConst.encryptedBal,
                               style: const TextStyle(
                                 fontSize: 36,
@@ -240,43 +225,44 @@ class AccountCard extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 7),
+                  const SizedBox(height: 15),
 
-                
                   // --------------------------------
-                  // FL CHART
+                  // INCOME & EXPENSE (TODAY)
                   // --------------------------------
+                  Obx(
+                    () => Row(
+                      children: [
+                        Expanded(
+                          child: CreditDebitBal(
+                            title: StringConst.todaysIncome,
+                            balance: '₹ ${controller.todayCreditAmount.value.toStringAsFixed(0)}',
+                            icon: IconConst.creditBal,
+                            isCredit: true,
+                          ),
+                        ),
 
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: CreditDebitBal(
+                            title: StringConst.todaysExpense,
+                            balance: '₹ ${controller.todayDebitAmount.value.toStringAsFixed(0)}',
+                            icon: IconConst.debitedBal,
+                            isCredit: false,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // --------------------------------
+                  // FL CHART (TODAY TREND)
+                  // --------------------------------
                   const SizedBox(height: 8),
 
                   const Expanded(
                     child: BalanceLineChart(),
-                  ),
-
-                  // --------------------------------
-                  // INCOME & EXPENSE
-                  // --------------------------------
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: CreditDebitBal(
-                          balance: '₹ 1,000',
-                          icon: IconConst.creditBal,
-                          isCredit: true,
-                        ),
-                      ),
-
-                      const SizedBox(width: 12),
-
-                      Expanded(
-                        child: CreditDebitBal(
-                          balance: '₹ 1,000',
-                          icon: IconConst.debitedBal,
-                          isCredit: false,
-                        ),
-                      ),
-                    ],
                   ),
                 ],
               ),
@@ -295,129 +281,128 @@ class AccountCard extends StatelessWidget {
 class BalanceLineChart extends StatelessWidget {
   const BalanceLineChart({super.key});
 
-  static const List<FlSpot> dummyPoints = [
-    FlSpot(0, 3),
-    FlSpot(1, 6),
-    FlSpot(2, 4),
-    FlSpot(3, 8),
-    FlSpot(4, 7),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: LineChart(
-        LineChartData(
-          minX: 0,
-          maxX: 4,
-          minY: 0,
-          maxY: 10,
+    final controller = HomeTabController.to;
 
-          // Remove axes and grid
-          gridData: const FlGridData(
-            show: false,
-          ),
+    return Obx(() {
+      final spots = controller.todayChartSpots;
 
-          titlesData: const FlTitlesData(
-            show: false,
-          ),
-
-          borderData: FlBorderData(
-            show: false,
-          ),
-
-          // Disable touch indicators for clean UI
-          lineTouchData: const LineTouchData(
-            enabled: false,
-          ),
-
-          // Dotted vertical guide lines
-          extraLinesData: ExtraLinesData(
-            verticalLines: dummyPoints.map((spot) {
-              return VerticalLine(
-                x: spot.x,
-                color: Colors.white.withValues(alpha: 0.18),
-                strokeWidth: 1,
-                dashArray: [3, 4],
-              );
-            }).toList(),
-          ),
-
-          lineBarsData: [
-            LineChartBarData(
-              spots: dummyPoints,
-
-              // Smooth curve
-              isCurved: true,
-              curveSmoothness: 0.35,
-
-              barWidth: 3,
-              isStrokeCapRound: true,
-              isStrokeJoinRound: true,
-
-              // Gradient line
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFFBFFFF3),
-                  Color(0xFF00FFD0),
-                ],
-              ),
-
-              // Neon glow
-              shadow: const Shadow(
-                color: Color(0x8800FFD0),
-                blurRadius: 12,
-              ),
-
-              // Gradient below the curve
-              belowBarData: BarAreaData(
-                show: true,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    const Color(0xFF00FFD0).withValues(
-                      alpha: 0.22,
-                    ),
-                    const Color(0xFF00FFD0).withValues(
-                      alpha: 0.0,
-                    ),
-                  ],
-                ),
-              ),
-
-              // Circular points
-              dotData: FlDotData(
-                show: true,
-                getDotPainter: (
-                  spot,
-                  percent,
-                  barData,
-                  index,
-                ) {
-                  final isLast = index == dummyPoints.length - 1;
-
-                  return FlDotCirclePainter(
-                    radius: isLast ? 7 : 4.5,
-                    color: isLast
-                        ? Colors.white
-                        : const Color(0xFF00EFC0),
-                    strokeWidth: isLast ? 3 : 1.5,
-                    strokeColor: isLast
-                        ? const Color(0xFF00EFC0)
-                        : Colors.white,
-                  );
-                },
+      if (spots.length < 2) {
+        return Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.25),
               ),
             ),
-          ],
-        ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.auto_graph_rounded,
+                  size: 16,
+                  color: Colors.white.withValues(alpha: 0.8),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  StringConst.noActivityToday,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
 
-        duration: const Duration(milliseconds: 800),
-        curve: Curves.easeInOut,
-      ),
-    );
+      double minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
+      double maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
+      if (minY == maxY) {
+        minY = minY * 0.9;
+        maxY = maxY * 1.1;
+      }
+
+      return SizedBox(
+        width: double.infinity,
+        child: LineChart(
+          LineChartData(
+            minX: 0,
+            maxX: (spots.length - 1).toDouble(),
+            minY: minY,
+            maxY: maxY,
+
+            gridData: const FlGridData(show: false),
+            titlesData: const FlTitlesData(show: false),
+            borderData: FlBorderData(show: false),
+            lineTouchData: const LineTouchData(enabled: false),
+
+            extraLinesData: ExtraLinesData(
+              verticalLines: spots.map((spot) {
+                return VerticalLine(
+                  x: spot.x,
+                  color: Colors.white.withValues(alpha: 0.18),
+                  strokeWidth: 1,
+                  dashArray: [3, 4],
+                );
+              }).toList(),
+            ),
+
+            lineBarsData: [
+              LineChartBarData(
+                spots: spots,
+                isCurved: true,
+                curveSmoothness: 0.35,
+                barWidth: 3,
+                isStrokeCapRound: true,
+                isStrokeJoinRound: true,
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFFBFFFF3),
+                    Color(0xFF00FFD0),
+                  ],
+                ),
+                shadow: const Shadow(
+                  color: Color(0x8800FFD0),
+                  blurRadius: 12,
+                ),
+                belowBarData: BarAreaData(
+                  show: true,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      const Color(0xFF00FFD0).withValues(alpha: 0.22),
+                      const Color(0xFF00FFD0).withValues(alpha: 0.0),
+                    ],
+                  ),
+                ),
+                dotData: FlDotData(
+                  show: true,
+                  getDotPainter: (spot, percent, barData, index) {
+                    final isLast = index == spots.length - 1;
+                    return FlDotCirclePainter(
+                      radius: isLast ? 6 : 4,
+                      color: isLast ? Colors.white : const Color(0xFF00EFC0),
+                      strokeWidth: isLast ? 2.5 : 1.2,
+                      strokeColor: isLast ? const Color(0xFF00EFC0) : Colors.white,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          duration: const Duration(milliseconds: 600),
+          curve: Curves.easeInOut,
+        ),
+      );
+    });
   }
 }
 
@@ -430,9 +415,11 @@ class CreditDebitBal extends StatelessWidget {
     super.key,
     required this.balance,
     required this.icon,
+    this.title = 'Income',
     this.isCredit = true,
   });
 
+  final String title;
   final String balance;
   final IconData icon;
   final bool isCredit;
@@ -440,12 +427,12 @@ class CreditDebitBal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accentColor = isCredit
-        ? Colors.green
-        : const Color(0xFFFF525D);
+        ? const Color(0xFF059669)
+        : const Color(0xFFDC2626);
 
     final iconColor = isCredit
         ? const Color(0xFF008F70)
-        : Colors.red;
+        : const Color(0xFFDC2626);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(22),
@@ -519,10 +506,12 @@ class CreditDebitBal extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      isCredit ? 'Income' : 'Expense',
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -536,7 +525,7 @@ class CreditDebitBal extends StatelessWidget {
                         balance,
                         style: TextStyle(
                           color: accentColor,
-                          fontSize: 21,
+                          fontSize: 20,
                           fontWeight: FontWeight.w800,
                         ),
                       ),

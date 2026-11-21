@@ -33,6 +33,8 @@ class StringConst {
   static const tapBelowToAddAccount = 'Tap below to add an account.';
   static const addAccount = 'Add Account';
   static const noTransactions = 'No transactions yet.';
+  static const noTransactionsFound = 'No transactions found for this account.';
+  static const noActivityToday = 'No spending activity recorded today.';
   static const scanAndDetectAccounts = 'Scan & Detect Accounts';
   static const scanAndAddOtherAccounts = 'Scan & Add Other Accounts';
   static const myAccounts = 'My Accounts';
@@ -40,13 +42,21 @@ class StringConst {
 
   static const totalBal = 'Total Balance';
   static const encryptedBal = 'XXXX';
+  static const todaysIncome = "Today's Income";
+  static const todaysExpense = "Today's Expense";
 
   ///Permission Dialog
   static const smsPermissionRequired = 'SMS Permission Required';
   static const smsPermissionDesc =
       'Monvexa needs access to your SMS to automatically detect and track your bank transactions.';
+  static const realtimeTrackingTitle = 'Enable Real-time Tracking';
+  static const realtimeTrackingDesc =
+      'Allow Monvexa to instantly detect bank transaction alerts so your expenses and balance update the moment you spend.';
+  static const notificationRequiredSms =
+      'Real-time SMS permission is required for transaction notifications.';
   static const cancelButton = 'Cancel';
   static const openSettingsButton = 'Open Settings';
+  static const remindLaterButton = 'Remind Later';
 
   ///Account Detection Screen
   static const closeButton = 'Close';

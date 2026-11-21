@@ -2,6 +2,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:monvexa/constants/app_colors.dart';
 import 'package:monvexa/constants/icon_const.dart';
+import 'package:monvexa/widgets/common/glass_container.dart';
 
 class SettingItem extends StatelessWidget {
   const SettingItem({
@@ -16,12 +17,11 @@ class SettingItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Container(
+      child: GlassContainer(
+        showBorder: true,
+        tint: AppColors.primary.withAlpha(1),
         padding: .symmetric(vertical: 20, horizontal: 10),
-        decoration: BoxDecoration(
-          borderRadius: .circular(10),
-          border: Border.all(color: AppColors.primaryDark, width: 1),
-        ),
+       
         child: Row(
           children: [
             Icon(icon, color: AppColors.primary),
