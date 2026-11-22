@@ -19,7 +19,7 @@ class SettingsTab extends StatelessWidget {
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  'Settings Tab',
+                  StringConst.settings,
                   style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
@@ -29,12 +29,7 @@ class SettingsTab extends StatelessWidget {
                 icon: IconConst.language,
                 onTap: () {},
               ),
-              SizedBox(height: 10),
-              SettingItemWithSwitch(
-                title: StringConst.darkMode,
-                icon: IconConst.darkMode,
-                settingKey: 'darkMode',
-              ),
+             
               SizedBox(height: 10),
               SettingItemWithSwitch(
                 title: StringConst.notification,

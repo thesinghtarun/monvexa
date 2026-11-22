@@ -12,6 +12,7 @@ class IconConst {
   static const IconData walletFill = Icons.account_balance_wallet_rounded;
   static const IconData settingsFill = CupertinoIcons.settings_solid;
 
+  static const IconData dropDown = Icons.keyboard_arrow_down_rounded;
   static const IconData add = Icons.add;
   static const IconData hideBal = Icons.visibility;
   static const IconData showBal = Icons.visibility_off;

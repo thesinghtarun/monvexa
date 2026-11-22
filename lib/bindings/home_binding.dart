@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:monvexa/controller/accounts/account_detection_controller.dart';
 import 'package:monvexa/controller/screens/home_screen_controller.dart';
 import 'package:monvexa/controller/tabs/home_tab_controller.dart';
 import 'package:monvexa/controller/tabs/settings_tab_controller.dart';

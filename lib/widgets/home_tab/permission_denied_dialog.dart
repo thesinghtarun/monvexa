@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:monvexa/constants/app_colors.dart';
 import 'package:monvexa/constants/string_const.dart';
@@ -102,15 +101,15 @@ class PermissionDeniedDialog extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
-                      elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
+                      elevation: 0,
                     ),
                     child: const Text(
                       StringConst.openSettingsButton,
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      style: TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ),

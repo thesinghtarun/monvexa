@@ -3,12 +3,14 @@ import 'package:get/get.dart';
 import 'package:monvexa/constants/image_const.dart';
 import 'package:monvexa/constants/string_const.dart';
 import 'package:monvexa/routes/app_routes.dart';
+import 'package:monvexa/services/ad_service.dart';
 import 'package:monvexa/services/pref_service.dart';
 
 class OnboardingController extends GetxController {
   final PageController pageController = PageController();
 
   final RxInt currentPage = 0.obs;
+  final RxDouble nativeAdHeight = 0.0.obs;
   bool get isLastPage => currentPage.value == onboardingImages.length - 1;
 
   final List<String> onboardingImages = [
@@ -40,8 +42,25 @@ class OnboardingController extends GetxController {
   String getOnboardingTitle2(int index) => onboardingTitles2[index];
   String getOnboardingDescription(int index) => onboardingDescriptions[index];
 
+  int _lastPageIndex = 0;
+
+  //To shift onboarding content Up based on ad height
+  void updateNativeAdHeight(double height) {
+  nativeAdHeight.value = height;
+}
+
   void onPageChanged(int index) {
+    final bool isNext = index > _lastPageIndex;
+    _lastPageIndex = index;
     currentPage.value = index;
+
+    // Trigger onboarding swipe interstitial with glass loading modal
+    if (Get.isRegistered<AdService>()) {
+      AdService.to.handleOnboardingSwipe(
+        isNext: isNext,
+        onProceed: () {},
+      );
+    }
   }
 
   void nextPage() {

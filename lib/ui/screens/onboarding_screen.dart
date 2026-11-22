@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:monvexa/constants/app_colors.dart';
 import 'package:monvexa/controller/screens/onboarding_controller.dart';
+import 'package:monvexa/widgets/ads/native/dynamic_native_ad_widget.dart';
 
 class OnboardingScreen extends GetView<OnboardingController> {
   const OnboardingScreen({super.key});
@@ -97,8 +98,16 @@ class OnboardingScreen extends GetView<OnboardingController> {
                         ),
                       ),
 
-                      // Clearance space for bottom controls (dots + button)
-                      const SizedBox(height: 130),
+                      // Dynamic clearance space for bottom controls (dots + button + native ad)
+                      Obx(() {
+                        final adHeight = controller.nativeAdHeight.value;
+                        final dynamicClearance = 130.0 + (adHeight > 0 ? adHeight + 14.0 : 0.0);
+                        return AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                          height: dynamicClearance,
+                        );
+                      }),
                     ],
                   ),
                 ),
@@ -106,7 +115,7 @@ class OnboardingScreen extends GetView<OnboardingController> {
             },
           ),
 
-          // 4. Fixed Bottom Controls (Dots & Action Button)
+          // 4. Fixed Bottom Controls (Dots & Action Button & Dynamic Native Ad)
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -191,6 +200,16 @@ class OnboardingScreen extends GetView<OnboardingController> {
                       ),
                     );
                   }),
+
+                  // Dynamic Native Ad below button (configured via remote config)
+                  Obx(() {
+                    final hasAd = controller.nativeAdHeight.value > 0;
+                    return SizedBox(height: hasAd ? 14 : 0);
+                  }),
+                  DynamicNativeAdWidget(
+                    placementKey: 'onboarding_native',
+                    onHeightChanged: controller.updateNativeAdHeight,
+                  ),
                 ],
               ),
             ),

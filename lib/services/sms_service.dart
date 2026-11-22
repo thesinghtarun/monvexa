@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -24,9 +25,40 @@ class BankDetectionResult {
 class SmsService extends GetxService {
   static const MethodChannel _smsChannel = MethodChannel('com.monvexa/sms');
   static const MethodChannel _permChannel = MethodChannel('com.monvexa/permissions');
+  static const EventChannel _liveChannel = EventChannel('com.monvexa/sms_live');
 
   final RxBool hasPermission = false.obs;
   final RxList<SmsModel> allMessages = <SmsModel>[].obs;
+
+  StreamSubscription? _liveSub;
+  final _liveSmsController = StreamController<SmsModel>.broadcast();
+  Stream<SmsModel> get onLiveSms => _liveSmsController.stream;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _initLiveListener();
+  }
+
+  @override
+  void onClose() {
+    _liveSub?.cancel();
+    _liveSmsController.close();
+    super.onClose();
+  }
+
+  void _initLiveListener() {
+    _liveSub = _liveChannel.receiveBroadcastStream().listen((dynamic event) {
+      if (event is Map) {
+        final sms = SmsModel.fromMap(Map<String, dynamic>.from(event));
+        debugPrint('[LiveSMS] Intercepted new SMS from: ${sms.address}');
+        allMessages.insert(0, sms);
+        _liveSmsController.add(sms);
+      }
+    }, onError: (dynamic err) {
+      debugPrint('[LiveSMS] Error: $err');
+    });
+  }
 
   /// Silent check on startup
   Future<void> checkPermissionSilently() async {
@@ -156,6 +188,12 @@ class SmsService extends GetxService {
     if (s.contains('SWIGGY') || s.contains('ZOMATO') || s.contains('FLIPKT') || s.contains('AMAZON')) return true;
     return false;
   }
+
+  /// Public helper to resolve bank name from any TRAI sender code (e.g. BOBTXN, BOBSMS -> Bank of Baroda)
+  String? resolveBankFromSender(String sender) => _resolveBankFromSenderHeader(sender);
+
+  /// Public helper to extract account number from SMS body
+  String? extractAccountNumberFromBody(String body) => _extractAccountNumber(body);
 
   String? _resolveBankFromSenderHeader(String sender) {
     if (_isPromotionalOrTelecom(sender)) return null;

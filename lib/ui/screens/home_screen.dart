@@ -5,6 +5,8 @@ import 'package:monvexa/constants/app_colors.dart';
 import 'package:monvexa/constants/icon_const.dart';
 import 'package:monvexa/constants/string_const.dart';
 import 'package:monvexa/controller/screens/home_screen_controller.dart';
+import 'package:monvexa/services/ad_service.dart';
+import 'package:monvexa/widgets/ads/banner_ad_widget.dart';
 import 'package:monvexa/widgets/home_screen/navigation_item.dart';
 import 'package:monvexa/widgets/home_screen/liquiid_glass_nav_bar.dart';
 
@@ -47,15 +49,28 @@ class HomeScreen extends GetView<HomeController> {
           // Current tab content
           Obx(() => controller.tabs[controller.selectedIndex.value]),
 
-          // Floating glass bottom navigation
-          Obx(
-            () => Align(
-              alignment: Alignment.bottomCenter,
-              child: LiquidGlassNavBar(
-                items: navItems,
-                selectedIndex: controller.selectedIndex.value,
-                onTap: controller.changeTabIndex,
-              ),
+          // Floating glass bottom navigation & Bottom Banner
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Obx(() {
+                  final isBanner = AdService.to.isBannerShowing.value;
+                  return LiquidGlassNavBar(
+                    items: navItems,
+                    selectedIndex: controller.selectedIndex.value,
+                    onTap: (index) {
+                      controller.changeTabIndex(index);
+                    },
+                    bottomMargin: isBanner ? 10.0 : null,
+                  );
+                }),
+                const SafeArea(
+                  top: false,
+                  child: BannerAdWidget(),
+                ),
+              ],
             ),
           ),
         ],

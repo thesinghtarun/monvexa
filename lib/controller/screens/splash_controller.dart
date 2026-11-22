@@ -1,9 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:get/get.dart';
 import 'package:monvexa/routes/app_routes.dart';
+import 'package:monvexa/services/ad_service.dart';
 import 'package:monvexa/services/database_service.dart';
 import 'package:monvexa/services/pref_service.dart';
 import 'package:monvexa/services/sms_service.dart';
+import 'package:monvexa/widgets/ads/native/fullscreen_native_template.dart';
 
 class SplashController extends GetxController with GetTickerProviderStateMixin {
   late AnimationController logoController;
@@ -101,7 +103,33 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
       _warmupServicesAndData(),
     ]);
 
-    // 5. Navigate to Home or Onboarding
+    // 5. Sequential Splash Ad Flow (splash -> ads -> onboarding/home)
+    if (Get.isRegistered<AdService>()) {
+      await AdService.to.runSplashAdFlow(
+        onComplete: (fallbackNative) {
+          if (fallbackNative != null) {
+            // Fullscreen native fallback ad
+            AdService.to.isFullScreenAdShowing = true;
+            Get.to(() => FullscreenNativeTemplate(
+                  nativeAd: fallbackNative,
+                  onDismiss: () {
+                    AdService.to.isFullScreenAdShowing = false;
+                    AdService.to.resetHomeTimer();
+                    fallbackNative.dispose();
+                    _navigateToNextScreen();
+                  },
+                ));
+          } else {
+            _navigateToNextScreen();
+          }
+        },
+      );
+    } else {
+      _navigateToNextScreen();
+    }
+  }
+
+  void _navigateToNextScreen() {
     final bool done = PrefService.to.isOnboardingDone;
     Get.offNamed(done ? AppRoutes.home : AppRoutes.onboarding);
   }
@@ -111,7 +139,10 @@ class SplashController extends GetxController with GetTickerProviderStateMixin {
       // Warm up SQLite database
       await DatabaseService.to.database;
 
-      // Check permission silently & preload SMS if already granted
+      // Only check and load SMS if onboarding was already completed by the user
+      final bool onboardingDone = PrefService.to.isOnboardingDone;
+      if (!onboardingDone) return;
+
       if (Get.isRegistered<SmsService>()) {
         final smsService = Get.find<SmsService>();
         await smsService.checkPermissionSilently();

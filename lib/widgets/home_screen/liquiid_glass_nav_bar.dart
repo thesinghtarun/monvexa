@@ -9,23 +9,26 @@ class LiquidGlassNavBar extends StatelessWidget {
   final List<NavigationItem> items;
   final int selectedIndex;
   final ValueChanged<int> onTap;
+  final double? bottomMargin;
 
   const LiquidGlassNavBar({
     super.key,
     required this.items,
     required this.selectedIndex,
     required this.onTap,
+    this.bottomMargin,
   });
 
   @override
   Widget build(BuildContext context) {
     final bottomPad = MediaQuery.of(context).padding.bottom;
+    final effectiveBottom = bottomMargin ?? (bottomPad > 0 ? bottomPad + 8 : 16.0);
 
     return Padding(
       padding: EdgeInsets.only(
         left: 40,
         right: 40,
-        bottom: bottomPad > 0 ? bottomPad + 30 : 40,
+        bottom: effectiveBottom,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(40),
