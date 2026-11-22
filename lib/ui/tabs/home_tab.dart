@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:monvexa/constants/app_colors.dart';
@@ -6,6 +7,7 @@ import 'package:monvexa/constants/string_const.dart';
 import 'package:monvexa/controller/tabs/home_tab_controller.dart';
 import 'package:monvexa/models/transaction_model.dart';
 import 'package:monvexa/routes/app_routes.dart';
+import 'package:monvexa/services/ad_service.dart';
 import 'package:monvexa/widgets/home_tab/account_card.dart';
 
 class HomeTab extends StatelessWidget {
@@ -82,10 +84,14 @@ class HomeTab extends StatelessWidget {
                   return const _EmptyTransactionsView();
                 }
 
+                final hasBanner = Get.isRegistered<AdService>() &&
+                    AdService.to.isBannerShowing.value;
+                final bottomClearance = hasBanner ? 175.0 : 120.0;
+
                 return ListView.separated(
                   itemCount: list.length,
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                  separatorBuilder: (_, __) => const SizedBox(height: 10),
+                  padding: EdgeInsets.fromLTRB(20, 0, 20, bottomClearance),
+                  separatorBuilder: (_, _) => const SizedBox(height: 10),
                   itemBuilder: (context, index) {
                     final txn = list[index];
                     return _TransactionCard(transaction: txn);
@@ -133,100 +139,130 @@ class _TransactionCard extends StatelessWidget {
     final badgeIcon = isCredit ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded;
     final iconColor = isCredit ? const Color(0xFF059669) : const Color(0xFF4B5563);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Elegant category / type badge
-          Container(
-            height: 42,
-            width: 42,
-            decoration: BoxDecoration(
-              color: badgeBg,
-              borderRadius: BorderRadius.circular(12),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(18),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            // Glossy glass gradient matching Monvexa theme
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.white.withValues(alpha: 0.80),
+                AppColors.surface.withValues(alpha: 0.60),
+                const Color(0xFFE6F5F0).withValues(alpha: 0.72),
+              ],
+              stops: const [0.0, 0.45, 1.0],
             ),
-            child: Icon(
-              badgeIcon,
-              color: iconColor,
-              size: 20,
+            // High-sheen glass outline
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.90),
+              width: 1.2,
             ),
+            // Ambient soft drop shadow
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryDark.withValues(alpha: 0.05),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+              BoxShadow(
+                color: Colors.white.withValues(alpha: 0.7),
+                blurRadius: 4,
+                offset: const Offset(0, -1),
+              ),
+            ],
           ),
-          const SizedBox(width: 14),
-
-          // Merchant & formatted info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  transaction.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF111827),
+          child: Row(
+            children: [
+              // Category / type badge with frosted pill container
+              Container(
+                height: 44,
+                width: 44,
+                decoration: BoxDecoration(
+                  color: badgeBg.withValues(alpha: 0.85),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.8),
+                    width: 1.0,
                   ),
                 ),
-                const SizedBox(height: 3),
-                Row(
+                child: Icon(
+                  badgeIcon,
+                  color: iconColor,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 14),
+
+              // Merchant & formatted info
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (transaction.description.isNotEmpty) ...[
-                      Text(
-                        transaction.description,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF6B7280),
-                        ),
-                      ),
-                      const Text(
-                        ' • ',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF9CA3AF),
-                        ),
-                      ),
-                    ],
                     Text(
-                      _formatDate(transaction.date),
+                      transaction.title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Color(0xFF6B7280),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF111827),
                       ),
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        if (transaction.description.isNotEmpty) ...[
+                          Text(
+                            transaction.description,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                          const Text(
+                            ' • ',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF9CA3AF),
+                            ),
+                          ),
+                        ],
+                        Text(
+                          _formatDate(transaction.date),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: Color(0xFF6B7280),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          const SizedBox(width: 10),
+              const SizedBox(width: 10),
 
-          // Clean, high-contrast amount
-          Text(
-            '${isCredit ? "+" : "-"} ₹${transaction.amount.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
-              color: accentColor,
-              letterSpacing: -0.2,
-            ),
+              // Clean, high-contrast amount
+              Text(
+                '${isCredit ? "+" : "-"} ₹${transaction.amount.toStringAsFixed(2)}',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: accentColor,
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

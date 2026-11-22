@@ -325,8 +325,13 @@ class BalanceLineChart extends StatelessWidget {
       double minY = spots.map((s) => s.y).reduce((a, b) => a < b ? a : b);
       double maxY = spots.map((s) => s.y).reduce((a, b) => a > b ? a : b);
       if (minY == maxY) {
-        minY = minY * 0.9;
-        maxY = maxY * 1.1;
+        minY = minY > 0 ? minY * 0.9 : -10;
+        maxY = maxY > 0 ? maxY * 1.1 : 10;
+      } else {
+        // Add a comfortable 8% margin above and below so the curve never clips at the edges
+        final padding = (maxY - minY) * 0.12;
+        minY = (minY - padding).clamp(0.0, double.infinity);
+        maxY += padding;
       }
 
       return SizedBox(

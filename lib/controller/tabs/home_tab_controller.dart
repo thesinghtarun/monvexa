@@ -9,6 +9,7 @@ import 'package:monvexa/routes/app_routes.dart';
 import 'package:monvexa/services/database_service.dart';
 import 'package:monvexa/services/pref_service.dart';
 import 'package:monvexa/services/sms_service.dart';
+import 'package:monvexa/services/ad_service.dart';
 import 'package:monvexa/utils/sms_transaction_parser.dart';
 import 'package:monvexa/widgets/home_tab/permission_denied_dialog.dart';
 
@@ -40,6 +41,10 @@ class HomeTabController extends GetxController with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     loadAccountsFromDb();
 
+    if (Get.isRegistered<AdService>()) {
+      AdService.to.startHomeTimer();
+    }
+
     _liveSmsSub = smsService.onLiveSms.listen((sms) {
       _handleIncomingLiveSms(sms);
     });
@@ -51,6 +56,9 @@ class HomeTabController extends GetxController with WidgetsBindingObserver {
 
   @override
   void onClose() {
+    if (Get.isRegistered<AdService>()) {
+      AdService.to.stopHomeTimer();
+    }
     _liveSmsSub?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.onClose();
@@ -59,7 +67,14 @@ class HomeTabController extends GetxController with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
+      if (Get.isRegistered<AdService>()) {
+        AdService.to.startHomeTimer();
+      }
       handleAppResume();
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      if (Get.isRegistered<AdService>()) {
+        AdService.to.stopHomeTimer();
+      }
     }
   }
 
@@ -319,18 +334,37 @@ class HomeTabController extends GetxController with WidgetsBindingObserver {
     double debitSum = 0.0;
     final List<FlSpot> spots = [];
 
-    double cumulativeBalance = active.value?.balance ?? 0.0;
-    for (int i = 0; i < todayTransactions.length; i++) {
-      final txn = todayTransactions[i];
+    for (final txn in todayTransactions) {
       if (txn.isCredit) {
         creditSum += txn.amount;
       } else {
         debitSum += txn.amount;
       }
-      spots.add(FlSpot(
-        i.toDouble(),
-        txn.balance > 0 ? txn.balance : (cumulativeBalance - debitSum + creditSum),
-      ));
+    }
+
+    // Only generate graph spots if there was actual transaction activity today
+    if (todayTransactions.isNotEmpty) {
+      final currentBalance = active.value?.balance ?? 0.0;
+      // Opening balance at start of today (before today's debits/credits)
+      final openingBalance = currentBalance + debitSum - creditSum;
+
+      // Point 0: Day's Opening Balance baseline
+      spots.add(FlSpot(0, openingBalance));
+
+      // Points 1..N: Progression after each transaction today
+      double runningBalance = openingBalance;
+      for (int i = 0; i < todayTransactions.length; i++) {
+        final txn = todayTransactions[i];
+        if (txn.isCredit) {
+          runningBalance += txn.amount;
+        } else {
+          runningBalance -= txn.amount;
+        }
+        spots.add(FlSpot(
+          (i + 1).toDouble(),
+          txn.balance > 0 ? txn.balance : runningBalance,
+        ));
+      }
     }
 
     todayCreditAmount.value = creditSum;

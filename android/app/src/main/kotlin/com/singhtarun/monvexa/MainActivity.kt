@@ -16,6 +16,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugins.googlemobileads.GoogleMobileAdsPlugin
 
 class MainActivity : FlutterActivity() {
 
@@ -88,6 +89,28 @@ class MainActivity : FlutterActivity() {
                     unregisterLiveReceiver()
                 }
             })
+
+        // ── Register Native Ad Factories (Monvexa Themed) ──────────
+        GoogleMobileAdsPlugin.registerNativeAdFactory(
+            flutterEngine,
+            "small_native",
+            MonvexaNativeAdFactory(this, R.layout.small_native_ad)
+        )
+        GoogleMobileAdsPlugin.registerNativeAdFactory(
+            flutterEngine,
+            "medium_native",
+            MonvexaNativeAdFactory(this, R.layout.medium_native_ad)
+        )
+        GoogleMobileAdsPlugin.registerNativeAdFactory(
+            flutterEngine,
+            "large_native",
+            MonvexaNativeAdFactory(this, R.layout.large_native_ad)
+        )
+        GoogleMobileAdsPlugin.registerNativeAdFactory(
+            flutterEngine,
+            "full_native",
+            MonvexaNativeAdFactory(this, R.layout.fullscreen_native_ad)
+        )
     }
 
     override fun onRequestPermissionsResult(
@@ -206,5 +229,13 @@ class MainActivity : FlutterActivity() {
             }
         }
         return list
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "small_native")
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "medium_native")
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "large_native")
+        GoogleMobileAdsPlugin.unregisterNativeAdFactory(flutterEngine, "full_native")
+        super.cleanUpFlutterEngine(flutterEngine)
     }
 }
